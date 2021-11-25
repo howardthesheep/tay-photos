@@ -1,0 +1,24 @@
+body {
+    padding: 0.25em 1em;
+}
+
+.photo-gallery {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+.photo-gallery img {
+    max-height: 80vh;
+    min-height: 10vh;
+    max-width: 30vw;
+    min-width: 10vw;
+    margin: 1em;
+}
+
+hgroup {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+}
