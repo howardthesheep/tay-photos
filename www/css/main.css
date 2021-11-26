@@ -16,6 +16,10 @@ body {
     margin: 1em;
 }
 
+.photo-gallery img:hover {
+    cursor: pointer;
+}
+
 hgroup {
     display: flex;
     flex-direction: row;

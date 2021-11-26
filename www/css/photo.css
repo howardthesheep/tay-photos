@@ -1,0 +1,27 @@
+section {
+    margin: 0 auto;
+    width: fit-content;
+}
+
+img {
+    display: block;
+    max-height: 96vh;
+    max-width: 96vw;
+}
+
+section ul {
+    list-style: none;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    margin: 0 auto;
+}
+
+section ul li {
+    padding: 1em;
+    border: 1px solid black;
+}
+
+section ul li:hover {
+    cursor: pointer;
+}
