@@ -15,11 +15,17 @@ section ul {
     flex-direction: row;
     flex-wrap: nowrap;
     margin: 0 auto;
+    padding-left: 0;
 }
 
 section ul li {
     padding: 1em;
     border: 1px solid black;
+    margin-top: 0.25em;
+}
+
+section ul :not(:first-child) {
+    margin-left: 0.5em;
 }
 
 section ul li:hover {
