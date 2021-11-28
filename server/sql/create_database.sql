@@ -2,7 +2,7 @@ start transaction;
 
 -- Users Table --
 CREATE TABLE IF NOT EXISTS Users (
-    id BINARY(16) unique not null COMMENT 'UUIDv4',
+    id BINARY(16) unique not null default UUID() COMMENT 'UUIDv4',
     name varchar(255) not null,
     username varchar(255) not null,
     email varchar(255) not null,
@@ -17,10 +17,11 @@ CREATE TABLE IF NOT EXISTS Users (
 
 -- Galleries Table --
 CREATE TABLE IF NOT EXISTS Galleries (
-    id BINARY(16) unique not null COMMENT 'UUIDv4',
+    id BINARY(16) unique not null default UUID() COMMENT 'UUIDv4',
     owner BINARY(16) UNIQUE NOT NULL COMMENT 'UUID of Gallery Creator',
     name varchar(255) not null default 'Default Gallery',
     canonicalUrl tinytext not null unique COMMENT 'Alternate URL for Gallery',
+    createTime Date not null default Date(NOW()),
 
     PRIMARY KEY (id),
     FOREIGN KEY (owner)
@@ -30,7 +31,9 @@ CREATE TABLE IF NOT EXISTS Galleries (
 
 -- Gallery Photos Table --
 CREATE TABLE IF NOT EXISTS GalleryPhotos (
+    id BINARY(16) unique not null default UUID() COMMENT 'UUIDv4',
     gallery BINARY(16) UNIQUE NOT NULL COMMENT 'UUID of parent Gallery',
+    collection VARCHAR(255) COMMENT 'The Gallery Subsection the Photo exists in, if null then the photo is the Header Photo',
     photoPath VARCHAR(255) NOT NULL COMMENT 'File path to the photo',
 
     FOREIGN KEY (gallery)
