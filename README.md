@@ -11,10 +11,9 @@ Web application for storing, managing, and presenting photo galleries to clients
 - Compress photos before upload
 
 ### Backend TODO
-- SQL table for unique gallery links
-- SQL table for user logins
-- Backend API
-- Best way to store images (db vs filesystem)
+- Separate Backend API Modules into individual files
+- Create build script for .go files once module files have been created  
+- Store Images on filesystem, hold file path reference in DB
 
 ### Other TODO
 - Home cloud server parts
