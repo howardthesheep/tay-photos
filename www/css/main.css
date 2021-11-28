@@ -1,5 +1,12 @@
+@font-face {
+    font-family: 'Montserrat';
+    src: url("../ext/Montserrat-Medium.ttf") format('truetype'); /* Safari, Android, iOS */
+}
+
 body {
-    padding: 0.25em 1em;
+    margin: 0;
+    padding: 0;
+    font-family: 'Montserrat', serif;
 }
 
 .photo-gallery {
@@ -25,4 +32,13 @@ hgroup {
     flex-direction: row;
     flex-wrap: nowrap;
     justify-content: space-between;
+}
+
+header {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    background-color: black;
+    color: white;
+    height: fit-content;
 }
