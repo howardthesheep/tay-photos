@@ -14,77 +14,59 @@ export default class ApiManager {
 		return(`${this.apiLocation}/photo/${photoId}`);
 	}
 
-	testRequest() {
-		const initData = {
-			method: 'POST',
-			mode: 'cors',
-			cache: 'default'
-		};
-		const request = new Request(`${this.apiLocation}/photo/test`, initData);
-
-		fetch(request)
-			.then((response) => {
-				console.log(response);
-			}).catch((err) => {
-				console.error(`Error during testRequest: ${err}`);
-		});
-	}
-
-	testUserCRUD() {
-		let initData = {
-			method: 'post',
+	// Gets all the gallery information that is not photos or collection names
+	async getGalleryInfo(galleryId) {
+		try {
+			return await this._apiRequest(`${this.apiLocation}/gallery?id=${galleryId}`, 'GET', '')
+		} catch (e) {
+			throw(e);
 		}
-
-		// Create User
-		let request = new Request(`${this.apiLocation}/user/`, initData);
-		fetch(request)
-			.then((response) => {
-				console.log(response);
-			}).catch((err) => {
-			console.error(`Error during testRequest: ${err}`);
-		});
-
-		// Update User
-		initData.method = 'PUT';
-		request = new Request(`${this.apiLocation}/user`, initData);
-		fetch(request)
-			.then((response) => {
-				console.log(response);
-			}).catch((err) => {
-			console.error(`Error during testRequest: ${err}`);
-		});
-
-		// Get User
-		initData.method = 'GET';
-		request = new Request(`${this.apiLocation}/user`, initData);
-		fetch(request)
-			.then((response) => {
-				console.log(response);
-			}).catch((err) => {
-			console.error(`Error during testRequest: ${err}`);
-		});
-
-		// Delete User
-		initData.method = 'DELETE';
-		request = new Request(`${this.apiLocation}/user`, initData);
-		fetch(request)
-			.then((response) => {
-				console.log(response);
-			}).catch((err) => {
-			console.error(`Error during testRequest: ${err}`);
-		});
 	}
 
-	// TODO
-	// Sends a user & hashed password combination to backend
-	// Returns: a JWT to be stored in sessionStorage
-	login(userData) {
-
+	// Gets everything related to gallery photos & collection names
+	async getGalleryPhotos(galleryId) {
+		try {
+			return await this._apiRequest(`${this.apiLocation}/gallery/photos?id=${galleryId}`, 'GET', '')
+		} catch (e) {
+			throw(e);
+		}
 	}
 
-	// TODO
-	// Removes the JWT in sessionStorage and forces user to re-auth
-	logout() {
+	// Sends a user & password combination to backend
+	// Returns: an apiToken to be stored in sessionStorage
+	async login(userData) {
+		try {
+			return await this._apiRequest(`${this.apiLocation}/user/login`, 'POST', userData)
+		} catch (e) {
+			throw(e);
+		}
+	}
 
+	// Removes the apiToken in storage and forces user to re-auth
+	async logout() {
+		try {
+			return await this._apiRequest(`${this.apiLocation}/user/logout`, 'POST', '')
+		} catch (e) {
+			throw(e);
+		}
+	}
+
+	async _apiRequest(endpoint, requestMethod, body) {
+		return Promise((fufill, reject) => {
+			const requestData = {
+				method: requestMethod,
+				mode: 'cors',
+				cache: 'default',
+				body: body,
+			};
+			const request = new Request(endpoint, requestData);
+
+			fetch(request).then((response) => {
+				fufill(response);
+			}).catch((err) => {
+				console.error(`Error during API Request: ${err}\n\nRequest: ${request}`)
+				reject();
+			})
+		});
 	}
 }
