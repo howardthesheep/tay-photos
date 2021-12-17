@@ -9,8 +9,8 @@ import (
 )
 
 const (
-	username = "root"
-	password = "password"
+	username = "tayphotos_user"
+	password = "tayphoto_pass"
 	hostname = "127.0.0.1:3306"
 	dbname   = "tay_photos"
 )
