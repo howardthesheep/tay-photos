@@ -22,7 +22,17 @@ async function loadGalleryData() {
 		throw(e);
 	}
 
-	console.log(galleryInfo);
-	console.log(galleryPhotos);
-	// TODO: Populate page with GalleryInfo & Photos
+	let galleryInfoJson = await galleryInfo.json();
+	//let galleryPhotoJson = await galleryPhotos.json();
+
+	updateGalleryInfo(galleryInfoJson);
+	//updateGalleryPhotos(galleryPhotoJson);
+	// TODO: Populate page with Gallery Photos
+}
+
+function updateGalleryInfo(json) {
+	let date = new Date(json.create_time);
+
+	document.querySelector("#gallery-name").textContent = json.name;
+	document.querySelector("#gallery-date").textContent = date.toDateString();
 }
