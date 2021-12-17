@@ -2,12 +2,12 @@ start transaction;
 
 -- Users Table --
 CREATE TABLE IF NOT EXISTS Users (
-    id BINARY(16) unique not null default UUID() COMMENT 'UUIDv4',
+    id VARCHAR(36) unique not null default UUID() COMMENT 'UUIDv4',
     name varchar(255) not null,
     username varchar(255) not null,
     email varchar(255) not null,
     password varchar(128) not null,
-    apiToken BINARY(16) not null unique,
+    apiToken VARCHAR(36) not null unique,
 
     PRIMARY KEY (id),
     INDEX idx_username (username),
@@ -17,10 +17,10 @@ CREATE TABLE IF NOT EXISTS Users (
 
 -- Galleries Table --
 CREATE TABLE IF NOT EXISTS Galleries (
-    id BINARY(16) unique not null default UUID() COMMENT 'UUIDv4',
-    owner BINARY(16) UNIQUE NOT NULL COMMENT 'UUID of Gallery Creator',
+    id VARCHAR(36) unique not null default UUID() COMMENT 'UUIDv4',
+    owner VARCHAR(36) UNIQUE NOT NULL COMMENT 'UUID of Gallery Creator',
     name varchar(255) not null default 'Default Gallery',
-    canonicalUrl tinytext not null unique COMMENT 'Alternate URL for Gallery',
+    canonicalUrl varchar(255) not null unique COMMENT 'Alternate URL for Gallery',
     createTime Date not null default Date(NOW()),
 
     PRIMARY KEY (id),
@@ -31,8 +31,8 @@ CREATE TABLE IF NOT EXISTS Galleries (
 
 -- Gallery Photos Table --
 CREATE TABLE IF NOT EXISTS GalleryPhotos (
-    id BINARY(16) unique not null default UUID() COMMENT 'UUIDv4',
-    gallery BINARY(16) UNIQUE NOT NULL COMMENT 'UUID of parent Gallery',
+    id VARCHAR(36) unique not null default UUID() COMMENT 'UUIDv4',
+    gallery VARCHAR(36) NOT NULL COMMENT 'UUID of parent Gallery',
     collection VARCHAR(255) COMMENT 'The Gallery Subsection the Photo exists in, if null then the photo is the Header Photo',
     photoPath VARCHAR(255) NOT NULL COMMENT 'File path to the photo',
 
