@@ -40,7 +40,7 @@ func (r Router) startWebsite() {
 }
 
 func (r Router) initWebsiteRoutes() {
-	fs := http.FileServer(http.Dir("../www"))
+	fs := http.FileServer(http.Dir("./www"))
 
 	r.routes = []Route{
 		Route{
