@@ -6,17 +6,19 @@ import (
 	"fmt"
 	"log"
 	"time"
+
+	_ "github.com/go-sql-driver/mysql"
 )
 
 const (
-	username = "tayphotos_user"
+	username = "tayphoto_user"
 	password = "tayphoto_pass"
 	hostname = "127.0.0.1:3306"
 	dbname   = "tay_photos"
 )
 
 var database *sql.DB
-var dbStmts map[string]*sql.Stmt
+var dbStmts = make(map[string]*sql.Stmt)
 
 // TODO: Add more SQL statements
 var preparedStmts = map[string]string{
@@ -24,6 +26,7 @@ var preparedStmts = map[string]string{
 	"deleteUser":     "DELETE FROM Users WHERE id=?;",
 	"getUser":        "SELECT * FROM Users WHERE id=?;",
 	"getUserByEmail": "SELECT * FROM Users WHERE email=?;",
+	"getGallery":     "SELECT * FROM Galleries WHERE id=?;",
 }
 
 // DBConnection holds our active db connection and access to prepared queries
@@ -94,5 +97,5 @@ func closeConnection() {
 
 // Helper function for converting db connection info into usable form
 func dsn() string {
-	return fmt.Sprintf("%s:%s@tcp(%s)/%s", username, password, hostname, dbname)
+	return fmt.Sprintf("%s:%s@tcp(%s)/%s?parseTime=true", username, password, hostname, dbname)
 }

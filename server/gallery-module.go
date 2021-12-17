@@ -1,9 +1,20 @@
 package main
 
 import (
+	"encoding/json"
 	"log"
 	"net/http"
+	"net/url"
+	"time"
 )
+
+type Gallery struct {
+	Id           string    `json:"id"`
+	Owner        string    `json:"owner"`
+	Name         string    `json:"name"`
+	CanonicalUrl string    `json:"canonical_url"`
+	CreateTime   time.Time `json:"create_time"`
+}
 
 // API Module which handles all /gallery subtree endpoints
 func galleryModule(w http.ResponseWriter, r *http.Request) {
@@ -21,6 +32,13 @@ func galleryModule(w http.ResponseWriter, r *http.Request) {
 
 // Handles Requests for CRUD operations on Galleries
 func galleryCrud(w http.ResponseWriter, r *http.Request) {
+	urlObj, err := url.Parse(r.RequestURI)
+	if err != nil {
+		log.Printf("Error during url parsing: %s", urlObj.String())
+		w.WriteHeader(500)
+		return
+	}
+
 	switch r.Method {
 	case "POST":
 		createGallery()
@@ -32,10 +50,16 @@ func galleryCrud(w http.ResponseWriter, r *http.Request) {
 		updateGallery()
 		break
 	case "GET":
-		getGallery()
+		err = getGallery(w, urlObj.Query().Get("id"))
 		break
 	default:
-		log.Fatalf("Unhandled Method on Photo: " + r.Method)
+		println("Unhandled Method on Photo: " + r.Method)
+	}
+
+	if err != nil {
+		log.Printf("Error during galleryCrud: %s", err)
+		w.WriteHeader(500)
+		return
 	}
 }
 
@@ -43,4 +67,29 @@ func galleryCrud(w http.ResponseWriter, r *http.Request) {
 func createGallery() {}
 func deleteGallery() {}
 func updateGallery() {}
-func getGallery()    {}
+func getGallery(w http.ResponseWriter, id string) error {
+	// Query the db
+	db := GetDatabase()
+	rows := db.stmts["getGallery"].QueryRow(id)
+
+	// Scan rows into struct
+	gallery := Gallery{}
+	err := rows.Scan(&gallery.Id, &gallery.Owner, &gallery.Name, &gallery.CanonicalUrl, &gallery.CreateTime)
+	if err != nil {
+		return err
+	}
+
+	// Parse struct into json
+	galleryJson, err := json.Marshal(gallery)
+	if err != nil {
+		return err
+	}
+
+	// Write json to client
+	_, err = w.Write(galleryJson)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

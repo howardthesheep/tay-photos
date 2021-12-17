@@ -4,6 +4,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"net/url"
 	"strings"
 )
 
@@ -43,5 +44,12 @@ func trimParentEndpoint(str string, parentEndpoint string) string {
 	} else {
 		endpoint = urlTokens[1]
 	}
-	return endpoint
+
+	endpointUrl, err := url.Parse(endpoint)
+	if err != nil {
+		log.Printf("Error parsing string into URL: %s", err)
+		return ""
+	}
+
+	return endpointUrl.Path
 }
