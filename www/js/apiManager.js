@@ -17,7 +17,7 @@ export default class ApiManager {
 	// Gets all the gallery information that is not photos or collection names
 	async getGalleryInfo(galleryId) {
 		try {
-			return await this._apiRequest(`${this.apiLocation}/gallery?id=${galleryId}`, 'GET', '')
+			return await this._apiRequest(`${this.apiLocation}/gallery?id=${galleryId}`, 'GET')
 		} catch (e) {
 			throw(e);
 		}
@@ -26,7 +26,7 @@ export default class ApiManager {
 	// Gets everything related to gallery photos & collection names
 	async getGalleryPhotos(galleryId) {
 		try {
-			return await this._apiRequest(`${this.apiLocation}/gallery/photos?id=${galleryId}`, 'GET', '')
+			return await this._apiRequest(`${this.apiLocation}/gallery/photos?id=${galleryId}`, 'GET')
 		} catch (e) {
 			throw(e);
 		}
@@ -52,12 +52,12 @@ export default class ApiManager {
 	}
 
 	async _apiRequest(endpoint, requestMethod, body) {
-		return Promise((fufill, reject) => {
+		return new Promise((fufill, reject) => {
 			const requestData = {
 				method: requestMethod,
 				mode: 'cors',
 				cache: 'default',
-				body: body,
+				body: body == null ? null : body,
 			};
 			const request = new Request(endpoint, requestData);
 
