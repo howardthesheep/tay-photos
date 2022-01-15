@@ -9,19 +9,14 @@ import (
  *		Routing Data Structures
  **************************************/
 
-type RouteHandler struct {
-	baseHandler http.HandlerFunc
-	subHandlers []RouteHandler
-}
-
 type Route struct {
-	base      string  // The 'root' of the route tree (Ex. /photos)
-	subRoutes []Route // The subchildren of the route root
+	base        string // The 'root' of the route tree (Ex. /photos)
+	baseHandler http.HandlerFunc
+	subRoutes   []Route // The subchildren of the route root
 }
 
 type Router struct {
-	routes        []Route        // Represent the universe of endpoints in the application
-	routeHandlers []RouteHandler // Represents the handlers of above endpoints
+	routes Route // Represent the universe of endpoints in the application
 }
 
 /***************************************
@@ -42,42 +37,24 @@ func (r Router) startWebsite() {
 func (r Router) initWebsiteRoutes() {
 	fs := http.FileServer(http.Dir("./www"))
 
-	r.routes = []Route{
-		Route{
-			"/",
-			[]Route{
-				Route{
-					"/photo/",
-					nil,
-				},
-				Route{
-					"/user/",
-					nil,
-				},
-				Route{
-					"/gallery/",
-					nil,
-				},
+	r.routes = Route{
+		"/",
+		fileServerMiddleware(fs),
+		[]Route{
+			Route{
+				"/photo/",
+				photoModule,
+				nil,
 			},
-		},
-	}
-
-	r.routeHandlers = []RouteHandler{
-		RouteHandler{
-			fileServerMiddleware(fs),
-			[]RouteHandler{
-				{
-					photoModule,
-					nil,
-				},
-				{
-					userModule,
-					nil,
-				},
-				{
-					galleryModule,
-					nil,
-				},
+			Route{
+				"/user/",
+				userModule,
+				nil,
+			},
+			Route{
+				"/gallery/",
+				galleryModule,
+				nil,
 			},
 		},
 	}
@@ -89,25 +66,24 @@ func (r Router) initWebsiteRoutes() {
  *			Helper Functions
  **************************************/
 
+// Registers all of a routers routes and associated handlers with HTTP
 func (r Router) _applyRouteHandlers() {
-	for i, route := range r.routes {
-		routeHandler := r.routeHandlers[i]
+	// Register the base route
+	route := r.routes
+	http.HandleFunc(route.base, route.baseHandler)
 
-		http.HandleFunc(route.base, routeHandler.baseHandler)
-		_applySubrouteHandlers(route.subRoutes, routeHandler.subHandlers)
-	}
+	// Apply all the subroutes
+	_applySubrouteHandlers(r.routes.subRoutes)
 }
 
-// Recursively applies all the subroute handlers to the proper subroute
-func _applySubrouteHandlers(subRoute []Route, subHandlers []RouteHandler) {
-	if subRoute == nil {
+// Recursively applies all the subroutes and their associated handlers
+func _applySubrouteHandlers(subRoutes []Route) {
+	if subRoutes == nil {
 		return
 	}
 
-	for i, route := range subRoute {
-		handler := subHandlers[i]
-
-		http.HandleFunc(route.base, handler.baseHandler)
-		_applySubrouteHandlers(route.subRoutes, handler.subHandlers)
+	for _, route := range subRoutes {
+		http.HandleFunc(route.base, route.baseHandler)
+		_applySubrouteHandlers(route.subRoutes)
 	}
 }
