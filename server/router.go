@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"strings"
 )
 
 /***************************************
@@ -10,7 +11,7 @@ import (
  **************************************/
 
 type Route struct {
-	base        string // The 'root' of the route tree (Ex. /photos)
+	name        string // The 'root' of the route tree (Ex. /photos)
 	baseHandler http.HandlerFunc
 	subRoutes   []Route // The subchildren of the route root
 }
@@ -42,19 +43,31 @@ func (r Router) initWebsiteRoutes() {
 		fileServerMiddleware(fs),
 		[]Route{
 			Route{
-				"/photo/",
+				"photo",
 				photoModule,
 				nil,
 			},
 			Route{
-				"/user/",
+				"user",
 				userModule,
-				nil,
+				[]Route{
+					Route{
+						"login",
+						login,
+						nil,
+					},
+				},
 			},
 			Route{
-				"/gallery/",
+				"gallery",
 				galleryModule,
-				nil,
+				[]Route{
+					Route{
+						"photos",
+						getGalleryPhotos,
+						nil,
+					},
+				},
 			},
 		},
 	}
@@ -68,22 +81,29 @@ func (r Router) initWebsiteRoutes() {
 
 // Registers all of a routers routes and associated handlers with HTTP
 func (r Router) _applyRouteHandlers() {
-	// Register the base route
+	// Register the name route
 	route := r.routes
-	http.HandleFunc(route.base, route.baseHandler)
+	http.HandleFunc(route.name, route.baseHandler)
 
 	// Apply all the subroutes
-	_applySubrouteHandlers(r.routes.subRoutes)
+	_applySubrouteHandlers(route.subRoutes, route.name)
 }
 
 // Recursively applies all the subroutes and their associated handlers
-func _applySubrouteHandlers(subRoutes []Route) {
+func _applySubrouteHandlers(subRoutes []Route, baseName string) {
 	if subRoutes == nil {
 		return
 	}
 
 	for _, route := range subRoutes {
-		http.HandleFunc(route.base, route.baseHandler)
-		_applySubrouteHandlers(route.subRoutes)
+		var fullPath string
+		if strings.HasSuffix(baseName, "/") || strings.HasPrefix(route.name, "/") {
+			fullPath = baseName + route.name
+		} else {
+			fullPath = baseName + "/" + route.name
+		}
+
+		http.HandleFunc(fullPath, route.baseHandler)
+		_applySubrouteHandlers(route.subRoutes, fullPath)
 	}
 }

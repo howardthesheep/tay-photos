@@ -93,3 +93,7 @@ func getGallery(w http.ResponseWriter, id string) error {
 
 	return nil
 }
+
+func getGalleryPhotos(w http.ResponseWriter, r *http.Request) {
+
+}
