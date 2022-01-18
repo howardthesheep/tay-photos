@@ -67,6 +67,11 @@ func (r Router) initWebsiteRoutes() {
 						getGalleryPhotos,
 						nil,
 					},
+					Route{
+						"photo",
+						getGalleryPhoto,
+						nil,
+					},
 				},
 			},
 		},

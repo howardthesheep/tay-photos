@@ -22,11 +22,12 @@ var dbStmts = make(map[string]*sql.Stmt)
 
 // TODO: Add more SQL statements
 var preparedStmts = map[string]string{
-	"createUser":     "INSERT INTO Users (id, name, username, email, password, apiToken) VALUES (?,?,?,?,?,?);",
-	"deleteUser":     "DELETE FROM Users WHERE id=?;",
-	"getUser":        "SELECT * FROM Users WHERE id=?;",
-	"getUserByEmail": "SELECT * FROM Users WHERE email=?;",
-	"getGallery":     "SELECT * FROM Galleries WHERE id=?;",
+	"createUser":                  "INSERT INTO Users (id, name, username, email, password, apiToken) VALUES (?,?,?,?,?,?);",
+	"deleteUser":                  "DELETE FROM Users WHERE id=?;",
+	"getUser":                     "SELECT * FROM Users WHERE id=?;",
+	"getUserByEmail":              "SELECT * FROM Users WHERE email=?;",
+	"getGallery":                  "SELECT * FROM Galleries WHERE id=?;",
+	"getGalleryPhotosByGalleryId": "SELECT gallery,collection,id FROM GalleryPhotos WHERE gallery=?;",
 }
 
 // DBConnection holds our active db connection and access to prepared queries

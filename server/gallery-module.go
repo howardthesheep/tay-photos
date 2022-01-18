@@ -16,6 +16,12 @@ type Gallery struct {
 	CreateTime   time.Time `json:"create_time"`
 }
 
+type GalleryPhoto struct {
+	Id         string `json:"id"`
+	Gallery    string `json:"gallery"`
+	Collection string `json:"collection"`
+}
+
 // API Module which handles all /gallery.html subtree endpoints
 func galleryModule(w http.ResponseWriter, r *http.Request) {
 	println("Gallery Module Request: " + requestString(r))
@@ -90,6 +96,67 @@ func getGallery(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
+// Gets the json representation of all the GalleryPhotos rows
+// associated with the provided Gallery.Id in the query args
 func getGalleryPhotos(w http.ResponseWriter, r *http.Request) {
-	println("Getting gallery.html photos...")
+	println("Getting gallery photos...")
+	urlObj, err := url.Parse(r.RequestURI)
+	if err != nil {
+		log.Printf("Error during url parsing: %s", urlObj)
+		w.WriteHeader(500)
+		return
+	}
+
+	id := urlObj.Query().Get("id")
+	db := GetDatabase()
+
+	rows, err := db.stmts["getGalleryPhotosByGalleryId"].Query(id)
+	if err != nil {
+		log.Printf("Error running db query: %s", err)
+		w.WriteHeader(500)
+		return
+	}
+
+	// Scan rows into struct
+	var galleryPhotoData []GalleryPhoto
+	for rows.Next() {
+		photoData := GalleryPhoto{}
+		err = rows.Scan(&photoData.Gallery, &photoData.Collection, &photoData.Id)
+		if err != nil {
+			log.Printf("Error row to struct scanning: %s", err)
+			w.WriteHeader(500)
+			return
+		}
+
+		galleryPhotoData = append(galleryPhotoData, photoData)
+	}
+
+	// Parse struct into json
+	galleryJson, err := json.Marshal(galleryPhotoData)
+	if err != nil {
+		log.Printf("Error marshalling json into struct: %s", err)
+		w.WriteHeader(500)
+		return
+	}
+
+	// Write json to client
+	_, err = w.Write(galleryJson)
+	if err != nil {
+		log.Printf("Error during writing json to client: %s", err)
+		w.WriteHeader(500)
+		return
+	}
+}
+
+// Sends the serialized photo based on the id provided in the query args
+func getGalleryPhoto(w http.ResponseWriter, r *http.Request) {
+	urlObj, err := url.Parse(r.RequestURI)
+	if err != nil {
+		log.Printf("Error during url parsing: %s", urlObj)
+		w.WriteHeader(500)
+		return
+	}
+	id := urlObj.Query().Get("id")
+
+	println("Getting gallery photo with id " + id)
 }
