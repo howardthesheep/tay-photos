@@ -8,7 +8,7 @@ export default class ApiManager {
 	getPhotoLink(photoId) {
 		// TODO: This will need to be removed when done testing
 		if (photoId == null) {
-			return `${this.apiLocation}/html/photo.html`;
+			return `${this.apiLocation}/photo.html`;
 		}
 
 		return(`${this.apiLocation}/photo/${photoId}`);

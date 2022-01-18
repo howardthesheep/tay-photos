@@ -16,41 +16,28 @@ type Gallery struct {
 	CreateTime   time.Time `json:"create_time"`
 }
 
-// API Module which handles all /gallery subtree endpoints
+// API Module which handles all /gallery.html subtree endpoints
 func galleryModule(w http.ResponseWriter, r *http.Request) {
 	println("Gallery Module Request: " + requestString(r))
-	endpoint := trimParentEndpoint(r.RequestURI, "/gallery")
-
-	switch endpoint {
-	case "/":
-		galleryCrud(w, r)
-		break
-	default:
-		println("Unrecognized Endpoint: " + endpoint)
-	}
+	galleryCrud(w, r)
 }
 
 // Handles Requests for CRUD operations on Galleries
 func galleryCrud(w http.ResponseWriter, r *http.Request) {
-	urlObj, err := url.Parse(r.RequestURI)
-	if err != nil {
-		log.Printf("Error during url parsing: %s", urlObj.String())
-		w.WriteHeader(500)
-		return
-	}
+	var err error
 
 	switch r.Method {
 	case "POST":
-		createGallery()
+		createGallery(w, r)
 		break
 	case "DELETE":
-		deleteGallery()
+		deleteGallery(w, r)
 		break
 	case "PUT":
-		updateGallery()
+		updateGallery(w, r)
 		break
 	case "GET":
-		err = getGallery(w, urlObj.Query().Get("id"))
+		err = getGallery(w, r)
 		break
 	default:
 		println("Unhandled Method on Photo: " + r.Method)
@@ -64,17 +51,26 @@ func galleryCrud(w http.ResponseWriter, r *http.Request) {
 }
 
 // TODO: Implement these
-func createGallery() {}
-func deleteGallery() {}
-func updateGallery() {}
-func getGallery(w http.ResponseWriter, id string) error {
+func createGallery(w http.ResponseWriter, r *http.Request) {}
+func deleteGallery(w http.ResponseWriter, r *http.Request) {}
+func updateGallery(w http.ResponseWriter, r *http.Request) {}
+func getGallery(w http.ResponseWriter, r *http.Request) error {
+	urlObj, err := url.Parse(r.RequestURI)
+	if err != nil {
+		log.Printf("Error during url parsing: %s", urlObj)
+		w.WriteHeader(500)
+		return err
+	}
+
+	id := urlObj.Query().Get("id")
+
 	// Query the db
 	db := GetDatabase()
 	rows := db.stmts["getGallery"].QueryRow(id)
 
 	// Scan rows into struct
 	gallery := Gallery{}
-	err := rows.Scan(&gallery.Id, &gallery.Owner, &gallery.Name, &gallery.CanonicalUrl, &gallery.CreateTime)
+	err = rows.Scan(&gallery.Id, &gallery.Owner, &gallery.Name, &gallery.CanonicalUrl, &gallery.CreateTime)
 	if err != nil {
 		return err
 	}
@@ -95,5 +91,5 @@ func getGallery(w http.ResponseWriter, id string) error {
 }
 
 func getGalleryPhotos(w http.ResponseWriter, r *http.Request) {
-
+	println("Getting gallery.html photos...")
 }
