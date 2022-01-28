@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -186,8 +187,12 @@ func getGalleryPhoto(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Parse out file extension
+	strTokens := strings.Split(photoPath, ".")
+	ext := strTokens[len(strTokens)-1]
+
 	// Write file in http response back to client
-	w.Header().Set("Content-Type", "image/*")
+	w.Header().Set("Content-Type", "image/"+ext)
 	w.Header().Set("Content-Disposition", "inline;")
 	_, err = w.Write(fileBytes)
 	if err != nil {

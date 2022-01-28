@@ -24,6 +24,8 @@ var preparedStmts = map[string]string{
 	"createUser":                  "INSERT INTO Users (id, name, username, email, password, apiToken) VALUES (?,?,?,?,?,?);",
 	"deleteUser":                  "DELETE FROM Users WHERE id=?;",
 	"getUser":                     "SELECT * FROM Users WHERE id=?;",
+	"userLogin":                   "SELECT apiToken FROM Users WHERE username=? AND password=?",
+	"emailLogin":                  "SELECT apiToken FROM Users WHERE email=? AND password=?",
 	"getUserByEmail":              "SELECT * FROM Users WHERE email=?;",
 	"getGallery":                  "SELECT * FROM Galleries WHERE id=?;",
 	"getGalleryPhotosByGalleryId": "SELECT gallery,collection,id FROM GalleryPhotos WHERE gallery=?;",

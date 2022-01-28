@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Login</title>
 	<link href="css/main.css" type="text/css" rel="stylesheet">
+	<script src="js/login.js" type="module"></script>
 </head>
 <body>
 	<header>
@@ -13,17 +14,17 @@
 	</header>
 	<section>
 		<h1>Login</h1>
-		<form method="POST" action="login.html">
+		<form method="POST" action="login.html" id="login-form">
 			<label>
 				Email | Username
-				<input type="text">
+				<input type="text" id="username">
 			</label>
 
 			<label>
 				Password
-				<input type="password">
+				<input type="password" id="password">
 			</label>
-			<button type="submit">Login</button>
+			<button type="button">Login</button>
 		</form>
 	</section>
 </body>
