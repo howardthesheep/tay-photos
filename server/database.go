@@ -20,7 +20,6 @@ const (
 var database *sql.DB
 var dbStmts = make(map[string]*sql.Stmt)
 
-// TODO: Add more SQL statements
 var preparedStmts = map[string]string{
 	"createUser":                  "INSERT INTO Users (id, name, username, email, password, apiToken) VALUES (?,?,?,?,?,?);",
 	"deleteUser":                  "DELETE FROM Users WHERE id=?;",
@@ -28,6 +27,7 @@ var preparedStmts = map[string]string{
 	"getUserByEmail":              "SELECT * FROM Users WHERE email=?;",
 	"getGallery":                  "SELECT * FROM Galleries WHERE id=?;",
 	"getGalleryPhotosByGalleryId": "SELECT gallery,collection,id FROM GalleryPhotos WHERE gallery=?;",
+	"getGalleryPhotoFilePath":     "SELECT photoPath FROM GalleryPhotos WHERE id=?;",
 }
 
 // DBConnection holds our active db connection and access to prepared queries

@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"os"
 	"time"
 )
 
@@ -158,5 +159,40 @@ func getGalleryPhoto(w http.ResponseWriter, r *http.Request) {
 	}
 	id := urlObj.Query().Get("id")
 
-	println("Getting gallery photo with id " + id)
+	// Crack open DB and run query
+	db := GetDatabase()
+	rows, err := db.stmts["getGalleryPhotoFilePath"].Query(id)
+	if err != nil {
+		log.Printf("Error querying db: %s", err)
+		w.WriteHeader(500)
+		return
+	}
+
+	var photoPath string
+	for rows.Next() {
+		err = rows.Scan(&photoPath)
+		if err != nil {
+			log.Printf("Error row to struct scanning: %s", err)
+			w.WriteHeader(500)
+			return
+		}
+	}
+
+	// Read file off of file system
+	fileBytes, err := os.ReadFile("/home/pjones" + photoPath)
+	if err != nil {
+		log.Printf("Error during photo open on filesystem: %s", err)
+		w.WriteHeader(500)
+		return
+	}
+
+	// Write file in http response back to client
+	w.Header().Set("Content-Type", "image/*")
+	w.Header().Set("Content-Disposition", "inline;")
+	_, err = w.Write(fileBytes)
+	if err != nil {
+		log.Printf("Error writing file bytes to client: %s", err)
+		w.WriteHeader(500)
+		return
+	}
 }
