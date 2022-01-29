@@ -35,9 +35,36 @@ export default class ApiManager {
 	// Sends a user & password combination to backend
 	// Returns: an apiToken to be stored in sessionStorage
 	async login(userData) {
-		const dataStr = JSON.stringify(userData)
+		const dataStr = JSON.stringify(userData);
 		try {
-			return await this._apiRequest(`${this.apiLocation}/user/login`, 'POST', dataStr)
+			return await this._apiRequest(`${this.apiLocation}/user/login`, 'POST', dataStr);
+		} catch (e) {
+			throw(e);
+		}
+	}
+
+	async deleteUser(userData) {
+		const dataStr = JSON.stringify(userData);
+		try {
+			return await this._apiRequest(`${this.apiLocation}/user`, 'DELETE', dataStr)
+		} catch (e) {
+			throw(e);
+		}
+	}
+
+	async createUser(userData) {
+		const dataStr = JSON.stringify(userData);
+		try {
+			return await this._apiRequest(`${this.apiLocation}/user`, 'POST', dataStr);
+		} catch (e) {
+			throw(e);
+		}
+	}
+
+	async updateUser(userData) {
+		const dataStr = JSON.stringify(userData);
+		try {
+			return await this._apiRequest(`${this.apiLocation}/user`, 'PUT', dataStr);
 		} catch (e) {
 			throw(e);
 		}
