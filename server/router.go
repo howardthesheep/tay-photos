@@ -43,11 +43,6 @@ func (r Router) initWebsiteRoutes() {
 		fileServerMiddleware(fs),
 		[]Route{
 			Route{
-				"photo",
-				photoModule,
-				nil,
-			},
-			Route{
 				"user",
 				userModule,
 				[]Route{
