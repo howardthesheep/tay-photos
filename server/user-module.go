@@ -41,18 +41,7 @@ type UserBasicData struct {
 // API Module which handles all /user subtree endpoints
 func userModule(w http.ResponseWriter, r *http.Request) {
 	println("User Module Request: " + requestString(r))
-	endpoint := trimParentEndpoint(r.RequestURI, "/user")
-
-	switch endpoint {
-	case "/":
-		userCrud(w, r)
-		break
-	case "/login":
-		login(w, r)
-		break
-	default:
-		println("Unrecognized Endpoint: " + endpoint)
-	}
+	userCrud(w, r)
 }
 
 // Handles Requests for CRUD operations on Users
