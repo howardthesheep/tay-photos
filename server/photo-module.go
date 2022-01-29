@@ -8,15 +8,7 @@ import (
 // API Module which handles all /photo subtree endpoints
 func photoModule(w http.ResponseWriter, r *http.Request) {
 	println("Photo Module Request: " + requestString(r))
-	endpoint := trimParentEndpoint(r.RequestURI, "/photo")
-
-	switch endpoint {
-	case "/":
-		photoCrud(w, r)
-		break
-	default:
-		println("Unrecognized Endpoint: " + endpoint)
-	}
+	photoCrud(w, r)
 }
 
 // Handles Requests for CRUD operations on Photos
