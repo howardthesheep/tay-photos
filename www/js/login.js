@@ -2,7 +2,7 @@ import ApiManager from "./apiManager.js";
 
 const api = new ApiManager();
 
-export async function login() {
+async function login() {
     const userStr = document.querySelector("#username").value;
     const passwordStr = document.querySelector("#password").value;
 
@@ -11,6 +11,7 @@ export async function login() {
         password: passwordStr
     });
 
+    // TODO: Save the returned apiToken and other stuff in session storage
     console.log(result);
 }
 

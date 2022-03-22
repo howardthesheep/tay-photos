@@ -79,6 +79,7 @@ export default class ApiManager {
 		}
 	}
 
+	// Helper function which does all the heavy lifting of creating, configuring, and sending requests to backend
 	async _apiRequest(endpoint, requestMethod, body) {
 		return new Promise((fufill, reject) => {
 			const requestData = {
