@@ -1,0 +1,26 @@
+.lightboxContainer {
+	z-index: 1;
+	position: fixed;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	background-color: rgba(63, 63, 63, 0.8);
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.lightboxImage {
+	max-width: 75%;
+}
+
+/*TODO*/
+.lightboxButtonContainer {
+
+}
+
+/*TODO*/
+.lightboxButton {
+
+}
