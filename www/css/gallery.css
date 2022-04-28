@@ -11,16 +11,68 @@
 	align-items: center;
 }
 
-.lightboxImage {
+.lightboxImageContainer {
 	max-width: 75%;
+	display: flex;
+	flex-direction: column;
+	margin: 0 auto;
 }
 
-/*TODO*/
-.lightboxButtonContainer {
+.lightboxImage {
+	max-height: 90vh;
+}
 
+.lightboxButtonContainer {
+	align-self: flex-end;
 }
 
 /*TODO*/
 .lightboxButton {
 
+}
+
+.shareDialogContainer {
+	position: fixed;
+	left: 0;
+	top: 0;
+	z-index: 2;
+	width: 100%;
+	height: 100%;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.shareDialog {
+	z-index: 2;
+	min-width: 25vw;
+	min-height: 18vh;
+	border-radius: 10px;
+	background-color: #474747;
+	color: white;
+	padding: 1em;
+}
+
+.shareDialogHeader {
+	margin-top: 0;
+	color: inherit;
+	display: flex;
+	justify-content: space-between;
+}
+
+.shareDialogContent {
+	padding: 1em;
+	display: flex;
+	flex-direction: column;
+}
+
+.socialLinkContainer {
+	margin-bottom: 1em;
+}
+
+.socialButton {
+	width: 80px;
+	height: 80px;
+	background-color: deepskyblue;
+	border-radius: 100%;
 }

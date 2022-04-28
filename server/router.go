@@ -53,6 +53,9 @@ func (r Router) initWebsiteRoutes() {
 					},
 				},
 			},
+			// TODO: Move module api logic to /api/gallery
+			//       - I don't want to have api logic & logic for serving page in the same place
+			//       - The fileServerMiddleware should handle all /*.html files, right now gallery module is handling /gallery.html requests
 			Route{
 				"gallery",
 				galleryModule,

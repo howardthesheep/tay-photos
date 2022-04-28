@@ -84,13 +84,13 @@ function lightboxImage(evt) {
 	// Add Share button
 	const shareBtn = document.createElement("button");
 	shareBtn.textContent = "Share";
-	shareBtn.onclick = (evt) => {}; // TODO: Implement Sharing feature
+	shareBtn.onclick = showShareDialog;
 	shareBtn.classList.add("lightboxButton");
 
 	// Add download button
 	const downloadBtn = document.createElement("button");
 	downloadBtn.textContent = "Download";
-	downloadBtn.onclick = (evt) => {}; // TODO: Implement Downloading feature
+	downloadBtn.onclick = downloadImage;
 	downloadBtn.classList.add("lightboxButton");
 
 	// Create Buttons container
@@ -98,19 +98,115 @@ function lightboxImage(evt) {
 	buttonContainer.classList.add("lightboxButtonContainer");
 	buttonContainer.append(shareBtn, downloadBtn);
 
-	// Create image container
-	const imageContainer = document.createElement("div");
-	imageContainer.classList.add("lightboxContainer");
-	imageContainer.onclick = removeLightbox;
-	imageContainer.append(lightboxImage);
-	imageContainer.append(buttonContainer);
+	// Create container that fits size of image
+	const imgContainer = document.createElement("div");
+	imgContainer.classList.add("lightboxImageContainer");
+	imgContainer.append(lightboxImage);
+	imgContainer.append(buttonContainer);
 
-	document.body.append(imageContainer);
+	// Create container of everything
+	const container = document.createElement("div");
+	container.classList.add("lightboxContainer");
+	container.onclick = removeLightbox;
+	container.append(imgContainer);
+
+	document.body.append(container);
+}
+
+function showShareDialog(evt) {
+
+	// Create Social Buttons
+	const twitterBtn = document.createElement("img");
+	twitterBtn.classList.add("socialButton");
+	const instagramBtn = document.createElement("img");
+	instagramBtn.classList.add("socialButton");
+	const socialLinkContainer = document.createElement("div");
+	socialLinkContainer.classList.add("socialLinkContainer");
+	socialLinkContainer.appendChild(twitterBtn);
+	socialLinkContainer.appendChild(instagramBtn);
+
+	// Create shareable link & copy button
+	const linkText = document.createElement("input");
+	linkText.id = "shareLink";
+	linkText.inputMode = "text";
+	// TODO: this should include an anchor to the image being shared, then have a check which opens
+	// 		 the image in lightbox if it's id is present in the url anchor
+	linkText.value = "http://localhost:6969/gallery.html?id=1f579937-d99c-4e0f-98a7-6a7e0976bcab";
+	linkText.readOnly = true;
+	const copyButton = document.createElement("button");
+	copyButton.innerText = "Copy";
+	copyButton.onclick = copyShareLink;
+	const copyLinkContainer = document.createElement("div");
+	copyLinkContainer.appendChild(linkText);
+	copyLinkContainer.appendChild(copyButton);
+
+	// Create dialog header
+	const dialogX = document.createElement("button"); // TODO: replace w/ icon
+	dialogX.id = "closeShareBtn"
+	dialogX.onclick = closeShareDialog;
+	dialogX.innerText = "X";
+	const dialogH3 = document.createElement("text");
+	dialogH3.innerText = "Share";
+	const dialogHeader = document.createElement("h3");
+	dialogHeader.classList.add("shareDialogHeader");
+	dialogHeader.appendChild(dialogH3);
+	dialogHeader.appendChild(dialogX);
+
+	// Create dialog itself
+	const shareDialog = document.createElement("div");
+	shareDialog.classList.add("shareDialog");
+	shareDialog.appendChild(dialogHeader);
+	shareDialog.appendChild(socialLinkContainer);
+	shareDialog.appendChild(copyLinkContainer);
+
+	// Create root container
+	const shareContainer = document.createElement("section");
+	shareContainer.classList.add("shareDialogContainer");
+	shareContainer.onclick = closeShareDialog;
+	shareContainer.appendChild(shareDialog);
+
+	document.body.appendChild(shareContainer);
+}
+
+function closeShareDialog(evt) {
+	const closeAreaClicked = evt.target.classList.contains("shareDialogContainer");
+	const closeBtnClicked = evt.target.id === "closeShareBtn";
+	if (closeAreaClicked || closeBtnClicked) {
+		const container = document.querySelector(".shareDialogContainer");
+		container?.remove();
+	}
+}
+
+// Copies the share link to the clipboard from the open share dialog
+function copyShareLink(_) {
+	const shareLink = document.querySelector("#shareLink").value;
+
+	if (!navigator.clipboard) {
+		try {
+			document.execCommand('copy', null, shareLink);
+		} catch (err) {
+			console.error('Fallback: Oops, unable to copy', err);
+		}
+		return;
+	}
+	navigator.clipboard.writeText(shareLink).then(null, function(err) {
+		console.error('Async: Could not copy text: ', err);
+	});
+}
+
+// Downloads an image through the browser
+function downloadImage(_) {
+	const link = document.createElement("a");
+	const imgElement = document.querySelector(".lightboxImage");
+	link.href = imgElement.src;
+	link.download = imgElement.src.split("=").pop() + ".jpeg";
+	document.body.appendChild(link);
+	link.click();
+	document.body.removeChild(link);
 }
 
 // Removes all .lightboxContainer from the DOM tree
 function removeLightbox(evt) {
-	console.log(evt.target.nodeName);
 	if (evt.target.nodeName.toLowerCase() === "button") return;
 
 	const containers = document.querySelectorAll(".lightboxContainer");
