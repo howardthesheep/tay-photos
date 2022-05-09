@@ -36,11 +36,9 @@ func (r Router) startWebsite() {
 }
 
 func (r Router) initWebsiteRoutes() {
-	fs := http.FileServer(http.Dir("./www"))
-
 	r.routes = Route{
 		"/",
-		fileServerMiddleware(fs),
+		http.NotFound,
 		[]Route{
 			Route{
 				"user",
@@ -53,9 +51,6 @@ func (r Router) initWebsiteRoutes() {
 					},
 				},
 			},
-			// TODO: Move module api logic to /api/gallery
-			//       - I don't want to have api logic & logic for serving page in the same place
-			//       - The fileServerMiddleware should handle all /*.html files, right now gallery module is handling /gallery.html requests
 			Route{
 				"gallery",
 				galleryModule,

@@ -226,6 +226,15 @@ func getUser(w http.ResponseWriter, r *http.Request) {
 
 // Authenticates a user and then returns an apiToken for privileged actions
 func login(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		_, err := w.Write([]byte("404 page not found"))
+		if err != nil {
+			log.Printf("Error writing 404 to client: %s", err)
+			return
+		}
+		return
+	}
+
 	var bodyBytes []byte
 	bodyBytes, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -239,6 +248,7 @@ func login(w http.ResponseWriter, r *http.Request) {
 	err = json.Unmarshal(bodyBytes, &userData)
 	if err != nil {
 		log.Printf("Error unmarshaling body: %s", err)
+		w.WriteHeader(400)
 		return
 	}
 
