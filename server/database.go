@@ -4,39 +4,50 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"io"
 	"log"
+	"os"
+	"strings"
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 )
 
-const (
-	username = "tayphoto_user"
-	password = "tayphoto_pass"
-	hostname = "127.0.0.1:3306"
-	dbname   = "tay_photos"
-)
-
 var database *sql.DB
-var dbStmts = make(map[string]*sql.Stmt)
+var dbStmts = make(map[QueryName]*sql.Stmt)
 
-var preparedStmts = map[string]string{
-	"createUser":                  "INSERT INTO Users (id, name, username, email, password, apiToken) VALUES (?,?,?,?,?,?);",
-	"deleteUser":                  "DELETE FROM Users WHERE id=?;",
-	"updateUser":                  "UPDATE Users SET name=?, username=?, email=? WHERE apiToken=?",
-	"getUser":                     "SELECT name,username,email FROM Users WHERE id=?;",
-	"userLogin":                   "SELECT apiToken FROM Users WHERE username=? AND password=?",
-	"emailLogin":                  "SELECT apiToken FROM Users WHERE email=? AND password=?",
-	"getUserByEmail":              "SELECT * FROM Users WHERE email=?;",
-	"getGallery":                  "SELECT * FROM Galleries WHERE id=?;",
-	"getGalleryPhotosByGalleryId": "SELECT gallery,collection,id FROM GalleryPhotos WHERE gallery=?;",
-	"getGalleryPhotoFilePath":     "SELECT photoPath FROM GalleryPhotos WHERE id=?;",
+var preparedStmts = map[QueryName]string{
+	CreateUser:                  "INSERT INTO Users (id, name, username, email, password, apiToken) VALUES (?,?,?,?,?,?);",
+	DeleteUser:                  "DELETE FROM Users WHERE id=?;",
+	UpdateUser:                  "UPDATE Users SET name=?, username=?, email=? WHERE apiToken=?",
+	GetUser:                     "SELECT name,username,email FROM Users WHERE id=?;",
+	UserLogin:                   "SELECT apiToken FROM Users WHERE username=? AND password=?",
+	EmailLogin:                  "SELECT apiToken FROM Users WHERE email=? AND password=?",
+	GetUserByEmail:              "SELECT * FROM Users WHERE email=?;",
+	GetGallery:                  "SELECT * FROM Galleries WHERE id=?;",
+	GetGalleryPhotosByGalleryId: "SELECT gallery,collection,id FROM GalleryPhotos WHERE gallery=?;",
+	GetGalleryPhotoFilePath:     "SELECT photoPath FROM GalleryPhotos WHERE id=?;",
 }
+
+type QueryName int
+
+const (
+	CreateUser QueryName = iota
+	DeleteUser
+	UpdateUser
+	GetUser
+	GetUserByEmail
+	UserLogin
+	EmailLogin
+	GetGallery
+	GetGalleryPhotosByGalleryId
+	GetGalleryPhotoFilePath
+)
 
 // DBConnection holds our active db connection and access to prepared queries
 type DBConnection struct {
 	database *sql.DB
-	stmts    map[string]*sql.Stmt
+	stmts    map[QueryName]*sql.Stmt
 }
 
 // GetDatabase returns the object for running SQL queries on Golang Backend
@@ -101,5 +112,33 @@ func closeConnection() {
 
 // Helper function for converting db connection info into usable form
 func dsn() string {
-	return fmt.Sprintf("%s:%s@tcp(%s)/%s?parseTime=true", username, password, hostname, dbname)
+	// Read the .env file storing credentials
+	envFile, err := os.Open("../.env")
+	if err != nil {
+		log.Printf("Error opening file" + err.Error())
+		return ""
+	}
+
+	// Read contents into variable
+	var contents []byte
+	contents, err = io.ReadAll(envFile)
+	if err != nil {
+		log.Printf("Error reading file" + err.Error())
+		return ""
+	}
+
+	// Parse key value pairs from .env file
+	var keyVal = map[string]string{}
+	lines := strings.Split(string(contents), "\n")
+	for _, line := range lines {
+		pair := strings.Split(line, "=")
+		keyVal[strings.TrimSpace(pair[0])] = strings.TrimSpace(pair[1])
+	}
+
+	return fmt.Sprintf("%s:%s@tcp(%s)/%s?parseTime=true",
+		keyVal["username"],
+		keyVal["password"],
+		keyVal["hostname"],
+		keyVal["dbname"],
+	)
 }

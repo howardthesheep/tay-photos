@@ -72,9 +72,9 @@ func getGallery(w http.ResponseWriter, r *http.Request) error {
 
 	id := urlObj.Query().Get("id")
 
-	// Query the db
+	// QueryName the db
 	db := GetDatabase()
-	rows := db.stmts["getGallery"].QueryRow(id)
+	rows := db.stmts[GetGallery].QueryRow(id)
 
 	// Scan rows into struct
 	gallery := Gallery{}
@@ -112,7 +112,7 @@ func getGalleryPhotos(w http.ResponseWriter, r *http.Request) {
 	id := urlObj.Query().Get("id")
 	db := GetDatabase()
 
-	rows, err := db.stmts["getGalleryPhotosByGalleryId"].Query(id)
+	rows, err := db.stmts[GetGalleryPhotosByGalleryId].Query(id)
 	if err != nil {
 		log.Printf("Error running db query: %s", err)
 		w.WriteHeader(500)
@@ -162,7 +162,7 @@ func getGalleryPhoto(w http.ResponseWriter, r *http.Request) {
 
 	// Crack open DB and run query
 	db := GetDatabase()
-	rows, err := db.stmts["getGalleryPhotoFilePath"].Query(id)
+	rows, err := db.stmts[GetGalleryPhotoFilePath].Query(id)
 	if err != nil {
 		log.Printf("Error querying db: %s", err)
 		w.WriteHeader(500)

@@ -88,7 +88,7 @@ func createUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	db := GetDatabase()
-	res, err := db.stmts["createUser"].Exec(userId.String(), userData.Name, userData.Username, userData.Email, string(hash), apiToken.String())
+	res, err := db.stmts[CreateUser].Exec(userId.String(), userData.Name, userData.Username, userData.Email, string(hash), apiToken.String())
 	if err != nil {
 		log.Printf("Error inserting new user into db: %s", err)
 		return
@@ -123,7 +123,7 @@ func deleteUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	db := GetDatabase()
-	res, err := db.stmts["deleteUser"].Exec(userData.Id)
+	res, err := db.stmts[DeleteUser].Exec(userData.Id)
 	if err != nil {
 		log.Printf("Error deleting user: %s", err)
 		w.WriteHeader(500)
@@ -158,7 +158,7 @@ func updateUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	db := GetDatabase()
-	res, err := db.stmts["updateUser"].Exec(userData.Name, userData.Username, userData.Email, userData.ApiToken)
+	res, err := db.stmts[UpdateUser].Exec(userData.Name, userData.Username, userData.Email, userData.ApiToken)
 	if err != nil {
 		log.Printf("Error updating user in database: %s", err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -196,7 +196,7 @@ func getUser(w http.ResponseWriter, r *http.Request) {
 
 	var userData UserBasicData
 	db := GetDatabase()
-	row := db.stmts["getUser"].QueryRow(id)
+	row := db.stmts[GetUser].QueryRow(id)
 	err := row.Scan(&userData.Name, &userData.Username, &userData.Email)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -224,8 +224,11 @@ func getUser(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// TODO: Refactor to use JWT methodology for authentication
 // Authenticates a user and then returns an apiToken for privileged actions
 func login(w http.ResponseWriter, r *http.Request) {
+
+	// TODO: this should send a request method not available http err
 	if r.Method != "POST" {
 		_, err := w.Write([]byte("404 page not found"))
 		if err != nil {
@@ -236,7 +239,7 @@ func login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var bodyBytes []byte
-	bodyBytes, err := ioutil.ReadAll(r.Body)
+	bodyBytes, err := ioutil.ReadAll(r.Body) // TODO refactor ReadAll
 	if err != nil {
 		log.Printf("Error reading body bytes: %s", err)
 		return
@@ -262,9 +265,9 @@ func login(w http.ResponseWriter, r *http.Request) {
 	db := GetDatabase()
 	var row *sql.Row
 	if strings.Contains(userData.Username, "@") {
-		row = db.stmts["emailLogin"].QueryRow(userData.Username, hash)
+		row = db.stmts[EmailLogin].QueryRow(userData.Username, hash)
 	} else {
-		row = db.stmts["userLogin"].QueryRow(userData.Username, hash)
+		row = db.stmts[UserLogin].QueryRow(userData.Username, hash)
 	}
 
 	var apiToken string
