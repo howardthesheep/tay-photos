@@ -17,6 +17,3 @@ Web application for storing, managing, and presenting photo galleries to clients
 - Finish Login page functionality
 - Implement Register account page
 - Work on backend logic for serving dashboard (Populate dashboard with links/preview to all their galleries)
-
-### Other TODO
-- Home cloud server parts

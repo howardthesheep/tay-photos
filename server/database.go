@@ -4,37 +4,21 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"io"
 	"log"
-	"os"
-	"strings"
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 )
 
-var database *sql.DB
-var dbStmts = make(map[QueryName]*sql.Stmt)
-
-var preparedStmts = map[QueryName]string{
-	CreateUser:                  "INSERT INTO Users (id, name, username, email, password, apiToken) VALUES (?,?,?,?,?,?);",
-	DeleteUser:                  "DELETE FROM Users WHERE id=?;",
-	UpdateUser:                  "UPDATE Users SET name=?, username=?, email=? WHERE apiToken=?",
-	GetUser:                     "SELECT name,username,email FROM Users WHERE id=?;",
-	UserLogin:                   "SELECT apiToken FROM Users WHERE username=? AND password=?",
-	EmailLogin:                  "SELECT apiToken FROM Users WHERE email=? AND password=?",
-	GetUserByEmail:              "SELECT * FROM Users WHERE email=?;",
-	GetGallery:                  "SELECT * FROM Galleries WHERE id=?;",
-	GetGalleryPhotosByGalleryId: "SELECT gallery,collection,id FROM GalleryPhotos WHERE gallery=?;",
-	GetGalleryPhotoFilePath:     "SELECT photoPath FROM GalleryPhotos WHERE id=?;",
-}
-
+// QueryName is a custom type which takes advantage of IDE autofill for seeing the universe
+// of sql.Stmt held in the dbStmts map.
 type QueryName int
 
 const (
 	CreateUser QueryName = iota
 	DeleteUser
 	UpdateUser
+	UpdateUserApiToken
 	GetUser
 	GetUserByEmail
 	UserLogin
@@ -48,6 +32,24 @@ const (
 type DBConnection struct {
 	database *sql.DB
 	stmts    map[QueryName]*sql.Stmt
+}
+
+// Globals
+var database *sql.DB                        // Connector to DB
+var dbStmts = make(map[QueryName]*sql.Stmt) // Map of queries available to the programmer using this
+
+var preparedStmts = map[QueryName]string{
+	CreateUser:                  "INSERT INTO Users (id, name, username, email, password, apiToken) VALUES (?,?,?,?,?,?);",
+	DeleteUser:                  "DELETE FROM Users WHERE id=?;",
+	UpdateUser:                  "UPDATE Users SET name=?, username=?, email=? WHERE apiToken=?",
+	UpdateUserApiToken:          "Update Users SET apiToken=? WHERE username=? AND password=?",
+	GetUser:                     "SELECT name,username,email FROM Users WHERE id=?;",
+	UserLogin:                   "SELECT apiToken FROM Users WHERE username=? AND password=?",
+	EmailLogin:                  "SELECT apiToken FROM Users WHERE email=? AND password=?",
+	GetUserByEmail:              "SELECT * FROM Users WHERE email=?;",
+	GetGallery:                  "SELECT * FROM Galleries WHERE id=?;",
+	GetGalleryPhotosByGalleryId: "SELECT gallery,collection,id FROM GalleryPhotos WHERE gallery=?;",
+	GetGalleryPhotoFilePath:     "SELECT photoPath FROM GalleryPhotos WHERE id=?;",
 }
 
 // GetDatabase returns the object for running SQL queries on Golang Backend
@@ -112,33 +114,12 @@ func closeConnection() {
 
 // Helper function for converting db connection info into usable form
 func dsn() string {
-	// Read the .env file storing credentials
-	envFile, err := os.Open("../.env")
-	if err != nil {
-		log.Printf("Error opening file" + err.Error())
-		return ""
-	}
-
-	// Read contents into variable
-	var contents []byte
-	contents, err = io.ReadAll(envFile)
-	if err != nil {
-		log.Printf("Error reading file" + err.Error())
-		return ""
-	}
-
-	// Parse key value pairs from .env file
-	var keyVal = map[string]string{}
-	lines := strings.Split(string(contents), "\n")
-	for _, line := range lines {
-		pair := strings.Split(line, "=")
-		keyVal[strings.TrimSpace(pair[0])] = strings.TrimSpace(pair[1])
-	}
+	env := GetEnv()
 
 	return fmt.Sprintf("%s:%s@tcp(%s)/%s?parseTime=true",
-		keyVal["username"],
-		keyVal["password"],
-		keyVal["hostname"],
-		keyVal["dbname"],
+		env["username"],
+		env["password"],
+		env["hostname"],
+		env["dbname"],
 	)
 }

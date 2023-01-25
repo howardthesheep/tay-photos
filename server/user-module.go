@@ -3,11 +3,14 @@ package main
 import (
 	"database/sql"
 	"encoding/json"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"strings"
+	"time"
 
+	"github.com/golang-jwt/jwt"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -224,22 +227,18 @@ func getUser(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// TODO: Refactor to use JWT methodology for authentication
 // Authenticates a user and then returns an apiToken for privileged actions
 func login(w http.ResponseWriter, r *http.Request) {
 
-	// TODO: this should send a request method not available http err
+	// Reject request if not POST
 	if r.Method != "POST" {
-		_, err := w.Write([]byte("404 page not found"))
-		if err != nil {
-			log.Printf("Error writing 404 to client: %s", err)
-			return
-		}
+		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
 
+	// Parse POST body contents
 	var bodyBytes []byte
-	bodyBytes, err := ioutil.ReadAll(r.Body) // TODO refactor ReadAll
+	bodyBytes, err := io.ReadAll(r.Body)
 	if err != nil {
 		log.Printf("Error reading body bytes: %s", err)
 		return
@@ -247,6 +246,7 @@ func login(w http.ResponseWriter, r *http.Request) {
 
 	log.Printf("Recieved login data: %s", string(bodyBytes))
 
+	// Unmarshal user login data from JSON
 	userData := UserLoginData{}
 	err = json.Unmarshal(bodyBytes, &userData)
 	if err != nil {
@@ -262,6 +262,7 @@ func login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Ask the db for user associated with email/username & password hash combination
 	db := GetDatabase()
 	var row *sql.Row
 	if strings.Contains(userData.Username, "@") {
@@ -270,6 +271,7 @@ func login(w http.ResponseWriter, r *http.Request) {
 		row = db.stmts[UserLogin].QueryRow(userData.Username, hash)
 	}
 
+	// Return a users stored apiToken to pass off to them to use for authenticating future requests
 	var apiToken string
 	err = row.Scan(&apiToken)
 	if err != nil {
@@ -286,7 +288,32 @@ func login(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// Stuff apiToken into map to be marshalled into json
+	// If apiToken is empty, generate them one
+	if apiToken == "" {
+		token := jwt.New(jwt.SigningMethodEdDSA)
+		claims := token.Claims.(jwt.MapClaims)
+		claims["exp"] = time.Now().Add(256 * time.Hour)
+		claims["authorized"] = true
+		claims["username"] = userData.Username
+
+		// Sign our token with secret JWTKey from .env file
+		env := GetEnv()
+		apiToken, err = token.SignedString(env["JWTKey"])
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			log.Printf("Error signing api token: %s", err)
+			return
+		}
+
+		// Update the api token associated with our user in the database
+		_, err = db.stmts[UpdateUserApiToken].Exec(apiToken, userData.Username, hash)
+		if err != nil {
+			log.Printf("Error updating user api token in database: %s", err)
+			return
+		}
+	}
+
+	// Stuff apiToken into map to be marshalled into json and sent back to client
 	jsonMap := make(map[string]string)
 	jsonMap["apiToken"] = apiToken
 	jsonBytes, err := json.Marshal(jsonMap)

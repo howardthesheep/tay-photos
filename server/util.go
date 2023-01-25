@@ -33,8 +33,9 @@ func debugRequest(r *http.Request) {
 
 // Given an API endpoint, this function returns the subtree
 // Ex.
-//		Input = '/user/login'
-//		Output = '/login'
+//
+//	Input = '/user/login'
+//	Output = '/login'
 func trimParentEndpoint(str string, parentEndpoint string) string {
 	var endpoint string
 

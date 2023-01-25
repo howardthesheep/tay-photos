@@ -1,5 +1,7 @@
-/photos
-/photos/*
+/user_media/documents/*
+/user_media/photos/*
+/user_media/videos/*
 /.idea
 /build/*
 build/
+.env
